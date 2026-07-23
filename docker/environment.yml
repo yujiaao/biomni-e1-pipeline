@@ -1,0 +1,14 @@
+name: biomni_e1
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pandas
+  - pip:
+      - requests>=2.31
+      - pymupdf>=1.24
+      # - sentence-transformers>=2.5
+      # - faiss-cpu>=1.8

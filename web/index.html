@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Biomni-E1 论文抓取控制台</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2933; --muted:#6b7785;
+    --line:#e3e8ef; --brand:#2563eb; --brand-soft:#dbeafe;
+    --ok:#16a34a; --run:#2563eb; --pause:#d97706; --err:#dc2626; --idle:#94a3b8;
+    --shadow:0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 48px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:20px;margin:0;font-weight:700}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;
+    font-weight:600;font-size:12.5px;border:1px solid var(--line);background:#fff}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--idle)}
+  .badge.running .dot{background:var(--run);box-shadow:0 0 0 3px var(--brand-soft)}
+  .badge.paused .dot{background:var(--pause)}
+  .badge.done .dot{background:var(--ok)}
+  .badge.error .dot{background:var(--err)}
+  .badge.idle .dot{background:var(--idle)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+  .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px}
+  .stat .k{color:var(--muted);font-size:12px}
+  .stat .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+  .stat .v small{font-size:12px;color:var(--muted);font-weight:500}
+
+  .progress{height:14px;border-radius:999px;background:#eef2f7;overflow:hidden;margin-top:10px}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#2563eb);
+    width:0;transition:width .5s ease}
+  .ptxt{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11.5px;color:var(--muted)}
+  .field input{width:96px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;
+    font-size:13px;background:#fff;color:var(--ink)}
+  button{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;transition:.15s}
+  button:hover{border-color:#c3ccd8}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  button.primary:hover{background:#1d4ed8}
+  button.warn{color:var(--pause);border-color:#f3d8a8;background:#fff7ec}
+  button.danger{color:var(--err);border-color:#f3c2c2;background:#fef2f2}
+  button:disabled{opacity:.5;cursor:not-allowed}
+
+  .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .cat{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fcfdff}
+  .cat .top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+  .cat .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cat .num{color:var(--muted);font-variant-numeric:tabular-nums}
+  .mini{height:7px;border-radius:999px;background:#eef2f7;overflow:hidden}
+  .mini > i{display:block;height:100%;background:#60a5fa;width:0;transition:width .4s}
+  .cat.full .mini > i{background:var(--ok)}
+
+  .err{color:var(--err);font-size:12.5px;margin-top:8px;min-height:14px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
+  td.cat-cell{color:var(--brand);white-space:nowrap}
+  .ttl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .filters{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .filters select{padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:13px}
+  .foot{color:var(--muted);font-size:12px;margin-top:6px}
+  a{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Biomni-E1 论文抓取控制台</h1>
+      <div class="sub">bioRxiv 元数据抓取 · SQLite 持久化 · 支持断点续传 (DeepSeek 替换 OpenAI)</div>
+    </div>
+    <span id="statusBadge" class="badge idle"><span class="dot"></span><span id="statusText">idle</span></span>
+  </header>
+
+  <div class="card">
+    <div class="grid-stats">
+      <div class="stat"><div class="k">已抓取 / 目标</div><div class="v"><span id="stTotal">0</span><small> / <span id="stTarget">2500</span></small></div></div>
+      <div class="stat"><div class="k">API 扫描偏移 cursor</div><div class="v" id="stCursor">0</div></div>
+      <div class="stat"><div class="k">已翻页数</div><div class="v" id="stPages">0</div></div>
+      <div class="stat"><div class="k">每类上限</div><div class="v" id="stPerCat">100</div></div>
+      <div class="stat"><div class="k">时间窗口</div><div class="v" id="stDays">540<small> 天</small></div></div>
+      <div class="stat"><div class="k">PDF 下载</div><div class="v" id="stDry">dry</div></div>
+    </div>
+    <div class="progress"><i id="barTotal"></i></div>
+    <div class="ptxt"><span id="ptxtPct">0%</span><span id="ptxtMeta"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <div class="field"><label>目标总数</label><input id="inTarget" type="number" value="2500" min="1"></div>
+      <div class="field"><label>每类上限</label><input id="inPerCat" type="number" value="100" min="1"></div>
+      <div class="field"><label>时间窗口(天)</label><input id="inDays" type="number" value="540" min="1"></div>
+      <div class="field"><label>最大页数(0=不限)</label><input id="inMaxPages" type="number" value="0" min="0"></div>
+      <button id="btnStart" class="primary">开始 / 续传</button>
+      <button id="btnPause" class="warn">暂停</button>
+      <button id="btnReset" class="danger">重置清空</button>
+    </div>
+    <div class="err" id="errMsg"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 12px;font-size:15px">各类别进度</h3>
+    <div class="cats" id="cats"></div>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <strong style="font-size:14px">论文列表</strong>
+      <select id="selCat"><option value="">全部类别</option></select>
+      <button id="btnRefresh">刷新</button>
+      <span class="foot">共 <span id="papTotal">0</span> 篇（按 id 倒序，最新在前）</span>
+    </div>
+    <div style="overflow:auto;max-height:420px">
+      <table>
+        <thead><tr><th style="width:42%">标题</th><th style="width:18%">类别</th><th style="width:18%">作者</th><th>日期</th></tr></thead>
+        <tbody id="papBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let timer = null;
+
+function setStatus(s){
+  const b = $('statusBadge');
+  b.className = 'badge ' + (s.status || 'idle');
+  $('statusText').textContent = s.status || 'idle';
+  $('stTotal').textContent = s.total ?? 0;
+  $('stTarget').textContent = s.target ?? 2500;
+  $('stCursor').textContent = s.cursor ?? 0;
+  $('stPages').textContent = s.pages ?? 0;
+  $('stPerCat').textContent = s.per_cat ?? 100;
+  $('stDays').innerHTML = (s.recency_days ?? 540) + ' <small>天</small>';
+  $('stDry').textContent = s.dry_run ? 'dry' : 'full';
+
+  const t = Math.max(0, Math.min(100, Math.round((s.total / (s.target||1)) * 100)));
+  $('barTotal').style.width = t + '%';
+  $('ptxtPct').textContent = t + '%';
+  const meta = [];
+  if (s.started_at) meta.push('开始于 ' + s.started_at);
+  if (s.finished_at) meta.push('结束于 ' + s.finished_at);
+  if (s.last_error) meta.push('错误: ' + s.last_error);
+  $('ptxtMeta').textContent = meta.join(' · ');
+
+  const running = !!s.running;
+  $('btnStart').disabled = running;
+  $('btnPause').disabled = !running;
+
+  // 类别进度
+  const wrap = $('cats'); wrap.innerHTML = '';
+  (s.categories || []).forEach(c => {
+    const pct = Math.max(0, Math.min(100, Math.round((c.count / (c.cap||1)) * 100)));
+    const div = document.createElement('div');
+    div.className = 'cat' + (c.count >= c.cap ? ' full' : '');
+    div.innerHTML = `<div class="top"><span class="nm" title="${c.name}">${c.name}</span>`
+      + `<span class="num">${c.count} / ${c.cap}</span></div>`
+      + `<div class="mini"><i style="width:${pct}%"></i></div>`;
+    wrap.appendChild(div);
+  });
+}
+
+async function loadStatus(){
+  try{
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    setStatus(s);
+  }catch(e){ $('errMsg').textContent = '状态获取失败: ' + e; }
+}
+
+async function loadPapers(){
+  const cat = $('selCat').value;
+  const url = '/api/papers?limit=200&offset=0' + (cat ? '&category=' + encodeURIComponent(cat) : '');
+  try{
+    const r = await fetch(url);
+    const d = await r.json();
+    $('papTotal').textContent = d.total ?? 0;
+    const tb = $('papBody'); tb.innerHTML = '';
+    (d.papers || []).forEach(p => {
+      const tr = document.createElement('tr');
+      const ttl = (p.title || '').length > 120 ? (p.title.slice(0,120)+'…') : (p.title||'');
+      const aut = (p.authors||'').toString().split(';')[0] || '';
+      tr.innerHTML = `<td class="ttl" title="${(p.title||'').replace(/"/g,'')}">${ttl||'—'}</td>`
+        + `<td class="cat-cell">${p.category||''}</td>`
+        + `<td>${aut}</td><td>${p.date||''}</td>`;
+      tb.appendChild(tr);
+    });
+  }catch(e){ $('errMsg').textContent = '论文列表失败: ' + e; }
+}
+
+async function postJSON(path, body){
+  const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{})});
+  if (r.status === 409){ const e = await r.json(); $('errMsg').textContent = e.error || '冲突'; return; }
+  if (!r.ok){ $('errMsg').textContent = '请求失败 ' + r.status; return; }
+  const s = await r.json();
+  setStatus(s);
+}
+
+$('btnStart').onclick = async () => {
+  $('errMsg').textContent = '';
+  await postJSON('/api/start', {
+    target: +$('inTarget').value, per_cat: +$('inPerCat').value,
+    recency_days: +$('inDays').value, max_pages: +$('inMaxPages').value,
+    dry_run: true
+  });
+  loadPapers();
+};
+$('btnPause').onclick = async () => { $('errMsg').textContent=''; await postJSON('/api/pause'); };
+$('btnReset').onclick = async () => {
+  if (!confirm('确定清空数据库与 papers.jsonl？（已抓取进度将丢失）')) return;
+  $('errMsg').textContent=''; await postJSON('/api/reset'); loadPapers();
+};
+$('btnRefresh').onclick = loadPapers;
+$('selCat').onchange = loadPapers;
+
+// 初始化类别下拉 + 轮询
+async function initCats(){
+  const r = await fetch('/api/status'); const s = await r.json();
+  const sel = $('selCat');
+  (s.categories||[]).forEach(c => {
+    const o = document.createElement('option'); o.value = c.name; o.textContent = c.name; sel.appendChild(o);
+  });
+}
+async function boot(){
+  await initCats();
+  await loadStatus();
+  await loadPapers();
+  timer = setInterval(async () => { await loadStatus(); }, 2000);
+}
+boot();
+</script>
+</body>
+</html>

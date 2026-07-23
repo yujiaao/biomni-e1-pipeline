@@ -1,0 +1,63 @@
+请分析以下论文文本片段，提取任务、工具、数据库和软件。
+
+论文标题：{title}
+所属领域：{category}
+当前块编号：{chunk_index}/{total_chunks}
+
+---论文文本---
+{chunk_text}
+---文本结束---
+
+请按以下 JSON Schema 输出（如果没有发现某类实体，返回空数组）：
+
+{
+  "tasks": [
+    {
+      "name": "任务名称（动词+宾语格式，如'单细胞RNA-seq注释'）",
+      "description": "任务目标描述",
+      "input_type": "输入数据类型",
+      "output_type": "输出数据类型",
+      "required_tools": ["依赖的工具名称"],
+      "required_databases": ["依赖的数据库"],
+      "difficulty": "easy/medium/hard",
+      "confidence": 0.0
+    }
+  ],
+  "tools": [
+    {
+      "name": "工具正式名称",
+      "type": "wet_lab | ai_model | know_how | algorithm",
+      "description": "功能描述",
+      "url": "官方链接或GitHub地址",
+      "version": "版本号（如提及）",
+      "language": "Python/R/Bash/Other",
+      "input_format": "输入格式",
+      "output_format": "输出格式",
+      "api_available": true,
+      "confidence": 0.0
+    }
+  ],
+  "databases": [
+    {
+      "name": "数据库名称",
+      "access_type": "api | local | unknown",
+      "url": "访问地址",
+      "schema": "数据结构描述",
+      "data_type": "存储数据类型",
+      "query_method": "查询方式（REST API/SQL/下载等）",
+      "size": "数据量级（如提及）",
+      "confidence": 0.0
+    }
+  ],
+  "software": [
+    {
+      "name": "软件包名（pip/conda/install 名称）",
+      "language": "Python/R/Bash",
+      "install_cmd": "安装命令（如能确定）",
+      "version": "版本号",
+      "dependencies": ["依赖的其他包"],
+      "primary_use": "主要用途",
+      "confidence": 0.0
+    }
+  ]
+}

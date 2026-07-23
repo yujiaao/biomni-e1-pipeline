@@ -1,0 +1,56 @@
+{
+  "project": "biomni-e1-repro",
+  "description": "文献驱动的工具环境构建（Biomni-E1 方法论复现）。本文件定义论文选取阶段使用的子领域与平台配置。",
+  "platforms": {
+    "biorxiv": {
+      "api_base": "https://api.biorxiv.org/details/biorxiv",
+      "pdf_base": "https://www.biorxiv.org/content",
+      "has_api": true,
+      "note": "生物医学预印本，文章采用其原生 25 个子领域分类"
+    },
+    "medrxiv": {
+      "api_base": "https://api.biorxiv.org/details/medrxiv",
+      "pdf_base": "https://www.medrxiv.org/content",
+      "has_api": true,
+      "note": "医学预印本，API 复用 bioRxiv 接口"
+    }
+  },
+  "selection": {
+    "recency_months": 18,
+    "papers_per_category": 100,
+    "demo": {
+      "recency_days": 30,
+      "papers_per_category": 3,
+      "enabled": false
+    },
+    "min_papers_per_category_per_year": 50,
+    "exclude": ["review", "correction", "retraction", "preprint-note"]
+  },
+  "categories": [
+    {"id": "animal_behavior",     "name": "Animal Behavior and Cognition",        "enabled": true},
+    {"id": "biochemistry",        "name": "Biochemistry",                          "enabled": true},
+    {"id": "bioengineering",      "name": "Bioengineering",                        "enabled": true},
+    {"id": "bioinformatics",      "name": "Bioinformatics",                        "enabled": true},
+    {"id": "biophysics",          "name": "Biophysics",                            "enabled": true},
+    {"id": "cancer_biology",      "name": "Cancer Biology",                        "enabled": true},
+    {"id": "cell_biology",        "name": "Cell Biology",                          "enabled": true},
+    {"id": "clinical_trials",     "name": "Clinical Trials",                       "enabled": true},
+    {"id": "developmental_bio",   "name": "Developmental Biology",                 "enabled": true},
+    {"id": "ecology",             "name": "Ecology",                               "enabled": true},
+    {"id": "epidemiology",        "name": "Epidemiology",                          "enabled": true},
+    {"id": "evolutionary_bio",    "name": "Evolutionary Biology",                  "enabled": true},
+    {"id": "genetics",            "name": "Genetics",                              "enabled": true},
+    {"id": "genomics",            "name": "Genomics",                              "enabled": true},
+    {"id": "immunology",          "name": "Immunology",                            "enabled": true},
+    {"id": "microbiology",        "name": "Microbiology",                          "enabled": true},
+    {"id": "molecular_biology",   "name": "Molecular Biology",                     "enabled": true},
+    {"id": "neuroscience",        "name": "Neuroscience",                          "enabled": true},
+    {"id": "paleontology",        "name": "Paleontology",                          "enabled": true},
+    {"id": "pathology",           "name": "Pathology",                             "enabled": true},
+    {"id": "pharmacology",        "name": "Pharmacology and Toxicology",           "enabled": true},
+    {"id": "physiology",          "name": "Physiology",                            "enabled": true},
+    {"id": "plant_biology",       "name": "Plant Biology",                         "enabled": true},
+    {"id": "sys_biology",         "name": "Systems Biology",                       "enabled": true},
+    {"id": "synthetic_bio",       "name": "Synthetic Biology",                     "enabled": true}
+  ]
+}

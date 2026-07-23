@@ -1,0 +1,12 @@
+# Biomni-E1 复现工程 — Python 依赖
+# 核心（必装，Phase 1/2/5 流程贯通所需）
+requests>=2.31
+pymupdf>=1.24
+pandas>=2.0
+
+# 检索/语义（可选，启用真实去重与检索时需装；不装则走 stub 占位向量）
+# sentence-transformers>=2.5
+# faiss-cpu>=1.8
+
+# 若使用官方 OpenAI SDK 而非纯 requests（可选）
+# openai>=1.30

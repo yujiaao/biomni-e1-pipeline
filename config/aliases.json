@@ -1,0 +1,19 @@
+{
+  "tool_aliases": {
+    "BLAST": ["NCBI BLAST", "blastn", "blastp", "makeblastdb"],
+    "Seurat": ["Seurat v5", "Seurat V4", "satija-lab/seurat"],
+    "Scanpy": ["ScanPy", "scan-py", "scverse/scanpy"],
+    "Cell Ranger": ["cellranger", "CellRanger", "10x cellranger"],
+    "Bioconductor": ["BiocManager", "bioconductor"],
+    "HISAT2": ["hisat2", "HISAT-2"],
+    "DESeq2": ["deseq2", "DESeq", "LoveLab"],
+    "PDB": ["RCSB PDB", "rcsb", "Protein Data Bank"],
+    "KEGG": ["KEGG PATHWAY", "kegg.jp"],
+    "ClinVar": ["NCBI ClinVar", "clinvar"]
+  },
+  "software_aliases": {
+    "requests": ["python-requests"],
+    "httr": ["R httr"],
+    "numpy": ["numpy-base"]
+  }
+}

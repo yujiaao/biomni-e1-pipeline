@@ -1,0 +1,16 @@
+{
+  "backend": "openai_compatible",
+  "base_url": "https://api.deepseek.com/v1",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "model": "deepseek-chat",
+  "temperature": 0.0,
+  "max_tokens": 4096,
+  "request_timeout": 30,
+  "max_retries": 2,
+  "stub_when_no_key": true,
+  "embedding": {
+    "backend": "sentence_transformers",
+    "model": "BAAI/bge-small-zh-v1.5",
+    "note": "DeepSeek 无 embedding 端点，改用本地 sentence-transformers 模型做语义去重/检索；若未安装则自动降级为 stub 占位向量"
+  }
+}
