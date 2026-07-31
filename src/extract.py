@@ -47,6 +47,24 @@ except Exception:  # noqa: BLE001
     HAVE_FITZ = False
 
 
+# ---- 全局限速（防 DeepSeek 429）：保证相邻 LLM 调用间隔 >= 60/rpm 秒 ----
+import threading
+_rate_lock = threading.Lock()
+_rate_last = [0.0]
+
+
+def _rate_limit(rpm: float) -> None:
+    if not rpm or rpm <= 0:
+        return
+    interval = 60.0 / rpm
+    with _rate_lock:
+        now = time.time()
+        wait = _rate_last[0] + interval - now
+        if wait > 0:
+            time.sleep(wait)
+        _rate_last[0] = time.time()
+
+
 def load_pdf_text(pdf_path: Path) -> str:
     if not HAVE_FITZ or not pdf_path.exists():
         return ""
@@ -101,11 +119,11 @@ def verify_url(url: str) -> bool:
         return False
 
 
-def process_paper(p: dict, client: LLMClient, system: str, user_tpl: str, args) -> dict:
+def process_paper(p: dict, client: LLMClient, system: str, user_tpl: str, args, ext_dir: Path) -> dict:
     """处理单篇论文。返回该篇的实体计数（失败则返回 {"error": True}）。线程安全：每篇写独立文件。"""
     doi = p.get("doi", "unknown")
     safe = doi.replace("/", "_").replace(":", "_")
-    ext_path = EXTRACT_DIR / f"{safe}.json"
+    ext_path = ext_dir / f"{safe}.json"
     try:
         pdf_path = PAPERS_PDF_DIR / f"{safe}.pdf"
         text = load_pdf_text(pdf_path)
@@ -125,6 +143,7 @@ def process_paper(p: dict, client: LLMClient, system: str, user_tpl: str, args) 
                     .replace("{chunk_index}", str(idx))
                     .replace("{total_chunks}", str(len(chunks)))
                     .replace("{chunk_text}", ch))
+            _rate_limit(args.rpm)
             res = client.extract(system, user)
             for k in agg:
                 agg[k].extend(res.get(k, []))
@@ -183,6 +202,12 @@ def main() -> int:
     ap.add_argument("--no-verify", action="store_true")
     ap.add_argument("--workers", type=int, default=4, help="并发线程数（默认 4）")
     ap.add_argument("--papers", default=str(PAPERS_JSONL))
+    ap.add_argument("--system-prompt", default=str(SYS_PROMPT),
+                    help="system prompt 文件路径（默认 config/prompts/system_prompt.txt）")
+    ap.add_argument("--run-dir", default=None,
+                    help="产物隔离目录；读 <run-dir>/papers.jsonl，写 <run-dir>/extractions/（默认 data/）")
+    ap.add_argument("--rpm", type=float, default=120.0,
+                    help="全局限速：每分钟最大 LLM 调用数（默认 120，防 DeepSeek 429；0=不限）")
     ap.add_argument("--resume", action="store_true", default=True,
                     help="跳过已提取的 DOI（断点续传，崩溃后可重跑继续）")
     ap.add_argument("--no-resume", dest="resume", action="store_false")
@@ -194,14 +219,23 @@ def main() -> int:
     if not HAVE_FITZ:
         print("[extract] 警告：未安装 pymupdf，将仅用摘要文本作为提取输入（pip install pymupdf）")
 
-    system = SYS_PROMPT.read_text(encoding="utf-8")
+    system = Path(args.system_prompt).read_text(encoding="utf-8")
     user_tpl = USER_PROMPT_TPL.read_text(encoding="utf-8")
 
-    papers = [json.loads(l) for l in Path(args.papers).read_text(encoding="utf-8").splitlines() if l.strip()]
+    # --run-dir 隔离：读 <run-dir>/papers.jsonl，写 <run-dir>/extractions/
+    if args.run_dir:
+        run_dir = Path(args.run_dir)
+        papers_path = run_dir / "papers.jsonl"
+        ext_dir = run_dir / "extractions"
+    else:
+        papers_path = Path(args.papers)
+        ext_dir = EXTRACT_DIR
+    ext_dir.mkdir(parents=True, exist_ok=True)
+
+    papers = [json.loads(l) for l in papers_path.read_text(encoding="utf-8").splitlines() if l.strip()]
     if args.limit:
         papers = papers[:args.limit]
 
-    EXTRACT_DIR.mkdir(parents=True, exist_ok=True)
     total_entities = {"tasks": 0, "tools": 0, "databases": 0, "software": 0}
 
     # 主线程预筛：已提取（且有实体）的直接计入并跳过；其余提交并发处理
@@ -209,7 +243,7 @@ def main() -> int:
     for p in papers:
         doi = p.get("doi", "unknown")
         safe = doi.replace("/", "_").replace(":", "_")
-        ext_path = EXTRACT_DIR / f"{safe}.json"
+        ext_path = ext_dir / f"{safe}.json"
         if not args.force and args.resume and ext_path.exists():
             try:
                 ex = json.loads(ext_path.read_text(encoding="utf-8"))
@@ -230,7 +264,7 @@ def main() -> int:
     if to_process:
         done = 0
         with ThreadPoolExecutor(max_workers=args.workers) as ex:
-            futs = {ex.submit(process_paper, p, client, system, user_tpl, args): p for p in to_process}
+            futs = {ex.submit(process_paper, p, client, system, user_tpl, args, ext_dir): p for p in to_process}
             for fut in as_completed(futs):
                 r = fut.result()
                 done += 1

@@ -1,0 +1,61 @@
+{
+  "project": "biomni-e1-arxiv-p1-full",
+  "description": "P1 四学科（物理/数学/化学/神经科学）arXiv 论文选取配置（全量版）。注意：arXiv board 级分类（如 astro-ph）在 API cat: 查询下返回 0 篇，必须拆成具体子类。papers_per_category 与分类数相乘需 ≤3000 唯一论文（跨分类去重后）。",
+  "platform": "arxiv",
+  "selection": {
+    "recency_months": 18,
+    "papers_per_category": 120,
+    "demo": {
+      "recency_days": 60,
+      "papers_per_category": 5,
+      "enabled": false
+    },
+    "min_papers_per_category_per_year": 20
+  },
+  "subjects": [
+    {
+      "discipline": "物理",
+      "arxiv_categories": [
+        "quant-ph",
+        "physics.optics",
+        "cond-mat.mes-hall",
+        "gr-qc",
+        "cond-mat.str-el",
+        "cond-mat.supr-con",
+        "astro-ph.EP",
+        "astro-ph.CO"
+      ]
+    },
+    {
+      "discipline": "数学",
+      "arxiv_categories": [
+        "math.AG",
+        "math.LO",
+        "math.NT",
+        "math.OC",
+        "math.CO",
+        "math.DG"
+      ]
+    },
+    {
+      "discipline": "化学",
+      "arxiv_categories": [
+        "cond-mat.mtrl-sci",
+        "physics.chem-ph",
+        "cond-mat.soft",
+        "physics.atm-clus",
+        "physics.bio-ph"
+      ]
+    },
+    {
+      "discipline": "神经科学",
+      "arxiv_categories": [
+        "q-bio.NC",
+        "cs.NE",
+        "stat.ML",
+        "cs.LG",
+        "eess.IV"
+      ]
+    }
+  ]
+}

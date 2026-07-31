@@ -80,7 +80,15 @@ class LLMClient:
                     timeout=self.timeout,
                 )
                 resp.raise_for_status()
-                content = resp.json()["choices"][0]["message"]["content"]
+                data = resp.json()
+                # DeepSeek/OpenAI 兼容网关：偶发在 200 响应体内返回限流错误
+                if isinstance(data, dict) and "error" in data:
+                    err = data["error"]
+                    msg = str(err.get("message", "") if isinstance(err, dict) else err).lower()
+                    code = str(err.get("code", "") if isinstance(err, dict) else "").lower()
+                    if "rate" in msg or "rate" in code or "too many" in msg or "quota" in msg:
+                        raise RuntimeError(f"rate_limit: {err}")
+                content = data["choices"][0]["message"]["content"]
                 return self._safe_parse(content)
             except Exception as e:  # noqa: BLE001
                 if attempt >= self.max_retries:
