@@ -57,6 +57,8 @@ def main() -> int:
     tool_names: Counter = Counter()
     task_names: Counter = Counter()
     per_disc_tools: dict[str, Counter] = {}
+    per_disc_tool_types: dict[str, Counter] = {}
+    tool_to_discs: dict[str, set] = {}   # 工具名 -> 出现的学科集合（跨学科技工共性）
     tot = {"papers": 0, "tasks": 0, "tools": 0, "dbs": 0, "sw": 0}
 
     for p in uniq:
@@ -75,9 +77,12 @@ def main() -> int:
             tot[kk] += n
         for t in ext.get("tools", []):
             nm = re.sub(r"[\s\-_]+", "", str(t.get("name", "")).lower())
-            if nm:
-                tool_names[t["name"]] += 1
-                per_disc_tools.setdefault(disc, Counter())[t["name"]] += 1
+            if not nm:
+                continue
+            tool_names[t["name"]] += 1
+            per_disc_tools.setdefault(disc, Counter())[t["name"]] += 1
+            per_disc_tool_types.setdefault(disc, Counter())[str(t.get("type", "未标注"))] += 1
+            tool_to_discs.setdefault(t["name"], set()).add(disc)
         for t in ext.get("tasks", []):
             nm = re.sub(r"[\s\-_]+", "", str(t.get("name", "")).lower())
             if nm:
@@ -92,6 +97,10 @@ def main() -> int:
         "top_tools": tool_names.most_common(20),
         "top_tasks": task_names.most_common(15),
         "top_tools_by_discipline": {d: c.most_common(8) for d, c in per_disc_tools.items()},
+        "cross_discipline_tools": sorted(
+            [(nm, len(discs), sorted(discs)) for nm, discs in tool_to_discs.items() if len(discs) >= 2],
+            key=lambda x: (-x[1], -tool_names[x[0]])),
+        "tool_type_by_discipline": {d: dict(c) for d, c in per_disc_tool_types.items()},
     }
     stats_path = run / "p1_pipeline_stats.json"
     stats_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -135,6 +144,47 @@ def build_report(out: dict) -> str:
         for name, n in lst:
             lines.append(f"- {name}（{n}）")
         lines.append("")
+    lines.append("## 跨学科技工共性（出现在 ≥2 个学科的工具）\n")
+    lines.append("> 这些工具/方法同时被多个学科采用，是**方法论收敛**的真实信号，而非单一领域的局部现象。\n")
+    cd_tools = out.get("cross_discipline_tools", [])
+    if cd_tools:
+        lines.append(f"- 共 **{len(cd_tools)}** 个工具跨越 ≥2 学科")
+        for name, ndisc, discs in cd_tools[:25]:
+            lines.append(f"- **{name}**：出现于 {ndisc} 个学科（{', '.join(discs)}）")
+    else:
+        lines.append("- （暂无跨学科技工）")
+    lines.append("")
+    lines.append("## 工具类型分布（实验 / 计算 / ML / 理论）\n")
+    lines.append("> 按抽取时标注的 `type` 字段统计，反映各学科的方法论构成。\n")
+    # stats 里 type 是英文键（wet_lab/algorithm/ai_model/know_how/hardware/software），
+    # 这里映射成中文列；未知键归入「其他」。
+    TYPE_MAP = {
+        "实验装置": ["wet_lab"],
+        "计算/模拟": ["algorithm"],
+        "机器学习": ["ai_model"],
+        "理论/数学": ["know_how"],
+        "硬件装置": ["hardware"],
+        "软件/库": ["software"],
+        "未标注": ["未标注"],
+    }
+    zh_cols = list(TYPE_MAP.keys())
+    lines.append("| 学科 | " + " | ".join(zh_cols) + " | 其他 |")
+    lines.append("|------|" + "------:|" * (len(zh_cols) + 1))
+    for disc, td in out.get("tool_type_by_discipline", {}).items():
+        mapped = {c: 0 for c in zh_cols}
+        other = 0
+        for k, v in td.items():
+            hit = False
+            for zh, en_keys in TYPE_MAP.items():
+                if k in en_keys:
+                    mapped[zh] += v
+                    hit = True
+                    break
+            if not hit:
+                other += v
+        row = [str(mapped[c]) for c in zh_cols] + [str(other)]
+        lines.append(f"| {disc} | " + " | ".join(row) + " |")
+    lines.append("")
     lines.append("## 说明\n")
     lines.append("- 仅抽取论文**摘要**（未下载全文 PDF），故 Database/Software 类实体偏少；全文抽取可进一步翻倍，成本仍极低。")
     lines.append("- arXiv board 级分类（如 `astro-ph`）在 API `cat:` 查询下返回 0 篇，全量时需拆分为具体子类（`astro-ph.CO/GA/EP` 等）。")
