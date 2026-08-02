@@ -49,6 +49,13 @@ BIN_OUTPUT = re.compile(r"二进制|binary|\.bam$|\.fastq$|\.gz$", re.IGNORECASE
 # 描述"过薄"软阈值（去空白后字符数低于此值视为待补全，非失败）
 DESC_THIN_CHARS = 10
 
+
+def _to_str(v) -> str:
+    """IO 字段可能存为 list（enrich_io 抽取）或 str（原始 schema）。统一成字符串供正则/展示。"""
+    if isinstance(v, list):
+        return ", ".join(str(x).strip() for x in v if str(x).strip())
+    return v if isinstance(v, str) else ("" if v is None else str(v))
+
 # 专业性白名单：已知科研专业工具/数据库/软件，任何关键词拒绝模式都不应误杀。
 # 名称归一化（去空格/标点、转小写）后匹配。命中即强制 professional=True。
 PROF_WHITELIST = {
@@ -77,7 +84,7 @@ def check_item(item: dict, kind: str) -> dict:
         desc = item.get("description") or item.get("schema") or item.get("query_method") or ""
     else:
         desc = item.get("description") or item.get("primary_use") or ""
-    out_fmt = item.get("output_format") or item.get("schema") or item.get("query_method") or ""
+    out_fmt = _to_str(item.get("output_format") or item.get("schema") or item.get("query_method") or "")
 
     # ① 名称清晰：有描述性名称且非过短缩写（全大写工具名如 HMMER/PDB 视为合法）
     checks["name_clear"] = bool(name) and len(name) >= 2
@@ -107,7 +114,7 @@ def check_item(item: dict, kind: str) -> dict:
     if kind == "software":
         checks["llm_readable"] = True
     elif is_task:
-        checks["llm_readable"] = bool(item.get("output_type")) and not BIN_OUTPUT.search(item.get("output_type") or "")
+        checks["llm_readable"] = bool(item.get("output_type")) and not BIN_OUTPUT.search(_to_str(item.get("output_type") or ""))
     else:
         checks["llm_readable"] = not BIN_OUTPUT.search(out_fmt)
 
