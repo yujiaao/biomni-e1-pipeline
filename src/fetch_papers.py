@@ -139,17 +139,29 @@ def main() -> int:
         return f"{base}/{doi}.full.pdf"
 
     PAPERS_JSONL.parent.mkdir(parents=True, exist_ok=True)
-    out_f = PAPERS_JSONL.open("w", encoding="utf-8")  # 截断开始；之后增量追加，崩溃可恢复
+    _seen: set[str] = set()
+    if PAPERS_JSONL.exists():
+        for line in PAPERS_JSONL.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    _seen.add(json.loads(line)["doi"])
+                except Exception:
+                    pass
+    out_f = PAPERS_JSONL.open("a", encoding="utf-8")  # 追加模式：多源累积 + 增量抓取
     count = 0
     for it in iter_papers(args.platform, start, end, args.max_pages):
         # bioRxiv 现版本 API 返回单值小写 `category` 字段（subject_areas 已废弃为 None）
         raw = it.get("category") or it.get("subject_areas") or ""
         subjects = [norm_subject(s) for s in str(raw).split(";") if s.strip()]
+        doi = it.get("doi")
         for sub in subjects:
             canon = enabled_lower.get(sub.lower())
-            if canon and len(buckets[canon]) < per_cat:
+            if not canon or doi in _seen:
+                continue
+            if len(buckets[canon]) < per_cat:
                 rec = {
-                    "doi": it.get("doi"),
+                    "doi": doi,
                     "title": it.get("title"),
                     "authors": it.get("authors"),
                     "date": it.get("date"),
@@ -157,9 +169,10 @@ def main() -> int:
                     "category": canon,
                     "category_id": enabled[canon],
                     "abstract": it.get("abstract"),
-                    "pdf_url": pdf_url(it.get("doi", ""), it.get("version", "")),
+                    "pdf_url": pdf_url(doi, it.get("version", "")),
                 }
                 buckets[canon].append(rec)
+                _seen.add(doi)
                 out_f.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 count += 1
                 if count % 50 == 0:

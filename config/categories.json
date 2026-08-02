@@ -16,8 +16,8 @@
     }
   },
   "selection": {
-    "recency_months": 18,
-    "papers_per_category": 100,
+    "recency_months": 36,
+    "papers_per_category": 200,
     "demo": {
       "recency_days": 30,
       "papers_per_category": 3,

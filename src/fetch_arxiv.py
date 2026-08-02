@@ -151,9 +151,17 @@ def main() -> int:
     else:
         out_path = PAPERS_JSONL
     buckets: dict[str, int] = {}
-    seen: set[str] = set()   # 跨分类重复去重（同一 DOI 只保留首次出现）
+    seen: set[str] = set()
+    if out_path.exists():
+        for line in out_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    seen.add(json.loads(line)["doi"])
+                except Exception:
+                    pass
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_f = out_path.open("w", encoding="utf-8")
+    out_f = out_path.open("a", encoding="utf-8")
     count = 0
     dup = 0
     for subj in cfg.get("subjects", []):

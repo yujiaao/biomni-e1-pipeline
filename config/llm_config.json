@@ -8,9 +8,9 @@
   "request_timeout": 30,
   "max_retries": 2,
   "stub_when_no_key": true,
-  "embedding": {
+    "embedding": {
     "backend": "sentence_transformers",
-    "model": "BAAI/bge-small-zh-v1.5",
-    "note": "DeepSeek 无 embedding 端点，改用本地 sentence-transformers 模型做语义去重/检索；若未安装则自动降级为 stub 占位向量"
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "note": "2026-08-02 由 bge-small-zh-v1.5 切换为 all-MiniLM-L6-v2：MiniLM 为英文通用句编码器，对英文生物医学实体/短语语义远优于中文 bge-zh（原 bge-zh 对英文生物医学弱，误并/漏并多）。语义去重阈值 --semantic 0.92（保守合并，分层 0.92/0.75）；若未安装则自动降级为 stub 占位向量"
   }
 }
