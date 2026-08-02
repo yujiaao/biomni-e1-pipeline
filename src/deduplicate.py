@@ -206,6 +206,7 @@ def build_canonical(entities: list[dict], alias_rev: dict[str, str], fuzzy: floa
         base["frequency"] = len(set(s for s in sources if s))
         base["mentions"] = len(members)
         base["source_papers"] = sorted(set(s for s in sources if s))
+        base["citation_sum"] = sum(int(m.get("_citation", 0) or 0) for m in members)
         merged.append(base)
     return merged
 
@@ -216,6 +217,8 @@ def main() -> int:
     ap.add_argument("--semantic", type=float, default=0.85)
     ap.add_argument("--workers", type=int, default=_DEFAULT_WORKERS,
                     help=f"并发进程数（Layer1/2 比较并行化，默认 {_DEFAULT_WORKERS}，机器逻辑核数 {CPU_COUNT}）")
+    ap.add_argument("--force", action="store_true",
+                    help="强制重建所有聚合（忽略已有聚合的断点续传复用）")
     args = ap.parse_args()
 
     client = LLMClient()
@@ -223,13 +226,34 @@ def main() -> int:
 
     files = sorted(EXTRACT_DIR.glob("*.json"))
     raw = {"tasks": [], "tools": [], "databases": [], "software": []}
+
+    # 论文级引用信号（OpenAlex cited_by_count）：构建 DOI -> citation 映射。
+    # citation 是「论文级」属性，比依赖 extraction 内字段更可靠——
+    # 聚合时按每个实体 source_paper 的 DOI 关联，汇总得到 citation_sum。
+    doi_cit: dict[str, int] = {}
+    pj = ROOT / "data" / "papers.jsonl"
+    if pj.exists():
+        for line in pj.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                d = json.loads(line)
+            except Exception:
+                continue
+            dd = d.get("doi")
+            if dd:
+                doi_cit[dd] = int(d.get("citation_count", 0) or 0)
+
     for f in files:
         data = json.loads(f.read_text(encoding="utf-8"))
         doi = data.get("doi")
+        cit = doi_cit.get(doi, 0)
         for k in raw:
             for e in data.get("extraction", {}).get(k, []):
                 e = dict(e)
                 e["_source_paper"] = doi
+                e["_citation"] = cit  # 论文级引用数，随聚合被 source_paper 关联
                 raw[k].append(e)
 
     AGG_DIR.mkdir(parents=True, exist_ok=True)
@@ -238,7 +262,7 @@ def main() -> int:
         out_path = AGG_DIR / f"{k}.json"
         # 断点续传：若已有有效聚合结果（count>0），直接复用，跳过重复计算
         # （机器休眠导致进程被杀后重跑时，已完成类型的聚合结果不丢失）
-        if out_path.exists():
+        if out_path.exists() and not args.force:
             try:
                 prev = json.loads(out_path.read_text(encoding="utf-8"))
                 if isinstance(prev, dict) and int(prev.get("count", 0)) > 0:

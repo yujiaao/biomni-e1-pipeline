@@ -9,8 +9,9 @@ analyze.py — Biomni-E1 洞察层（Phase 5+ 分析增强）
 
   1. 规模与质量概览（tier 分布、低置信度占比、待人工复核规模）
   2. 热度 Top 实体（frequency × confidence 作为无引用数据时的代理影响力）
+  2b. 影响力 Top 实体（citation_sum 加权，接 OpenAlex 被引信号，真实影响力）
   3. 方法簇：Task→Tool 共现网络 + 社群发现（networkx greedy modularity）
-  4. 跨学科技工共性（同一工具出现在 ≥3 个 bioRxiv 子领域）
+  4. 跨学科技工共性（同一工具出现在 ≥3 个子领域）
   5. 近期节奏：月度活跃论文数 + 月度新增唯一工具数
   6. 自动综述段落（可读 Markdown，给必学必会文章用）
 
@@ -119,6 +120,48 @@ def heat_top(items: list[dict], k: int = 30) -> list[dict]:
     scored.sort(key=lambda x: (-x[1], -x[2]))
     return [{"name": n, "heat": h, "frequency": f, "confidence": c}
             for n, h, f, c in scored[:k]]
+
+
+def build_doi_citation_map() -> dict[str, int]:
+    """DOI -> citation_count（来自 papers.jsonl，OpenAlex cited_by_count）。
+
+    citation 是论文级信号，聚合实体通过 source_papers 关联得到 citation_sum。
+    """
+    m: dict[str, int] = {}
+    p = ROOT / "data" / "papers.jsonl"
+    if not p.exists():
+        return m
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            d = json.loads(line)
+        except Exception:
+            continue
+        doi = d.get("doi")
+        if doi:
+            m[doi] = int(d.get("citation_count", 0) or 0)
+    return m
+
+
+def influence_top(items: list[dict], doi_cit: dict[str, int], k: int = 30) -> list[dict]:
+    """影响力 Top：以「实体覆盖论文的被引总次数 citation_sum」为真实影响力信号，
+    替代 freq×conf 代理分。优先读取聚合实体自带 citation_sum（deduplicate 注入），
+    否则按 source_papers 关联 papers.jsonl 实时汇总。"""
+    rows = []
+    for it in items:
+        cs = it.get("citation_sum")
+        if cs is None:
+            cs = sum(doi_cit.get(doi, 0) for doi in (it.get("source_papers") or []))
+        else:
+            cs = int(cs)
+        f = int(it.get("frequency", 1) or 1)
+        c = float(it.get("confidence", 0.5) or 0.5)
+        rows.append((it.get("name", "?"), cs, f, c))
+    rows.sort(key=lambda x: (-x[1], -x[2], -x[3]))
+    return [{"name": n, "citation_sum": cs, "frequency": f, "confidence": c}
+            for n, cs, f, c in rows[:k]]
 
 
 def cooccurrence_clusters(tasks: list[dict], tool_freq: dict[str, int], top: int = 12) -> dict:
@@ -234,6 +277,22 @@ def build_report(out: dict) -> str:
             L.append(f"- **{r['name']}**（热度 {r['heat']}，频次 {r['frequency']}，置信度 {r['confidence']}）")
         L.append("")
 
+    inf = out["influence"]
+    L.append("## 2b. 影响力 Top（citation 加权）\n")
+    L.append("> 以「实体覆盖论文的被引总次数 `citation_sum`」作为**真实影响力信号**，替代上面的 freq×conf 代理分。")
+    L.append("> citation 来自 OpenAlex `cited_by_count`，经 `source_papers` 的 DOI 关联到聚合实体。")
+    L.append("> 注意：被引数仅 OpenAlex 论文携带，且多数近 36 月论文尚无引用；故实体需其 source_papers 命中 OpenAlex 才会出现在此榜。\n")
+    any_cit = any(r["citation_sum"] > 0 for key in ("tools", "tasks") for r in inf[key])
+    for kind, key in (("工具", "tools"), ("任务", "tasks")):
+        L.append(f"### 影响力 Top {kind}（按 citation_sum）\n")
+        if any_cit:
+            for r in inf[key][:15]:
+                if r["citation_sum"] > 0:
+                    L.append(f"- **{r['name']}**（被引总 {r['citation_sum']}，频次 {r['frequency']}，置信度 {r['confidence']}）")
+        else:
+            L.append("- （当前聚合实体尚未关联到有引用的论文——OpenAlex 论文完成抽取并入聚合后，此处将显示真实被引影响力。）")
+        L.append("")
+
     cc = out["cooccurrence"]
     L.append("## 3. 方法簇（共现网络 + 社群发现）\n")
     L.append(f"> 由 Task→Tool 依赖构建共现网络：{cc['nodes']} 个工具节点、{cc['edges']} 条边；"
@@ -276,6 +335,15 @@ def build_report(out: dict) -> str:
              f"已从单一领域外溢为通用基础设施。")
     L.append(f"- 待人工复核队列高达 {q['review_queue']} 条，提示：在放大抓取前，"
              f"应先以 LLM-judge 自动收敛 + 英文生物医学 embedding 升级去重，否则噪声会随量级线性放大。")
+    # citation 影响力洞察
+    cit_tools = [r for r in out["influence"]["tools"] if r["citation_sum"] > 0]
+    if cit_tools:
+        top_cit = cit_tools[0]
+        L.append(f"- 接 OpenAlex 被引信号后，**{top_cit['name']}** 以累计被引 {top_cit['citation_sum']} 次"
+                 f"成为真实影响力最高的工具——这一信号是 freq×conf 代理分无法捕捉的（高频≠高影响力）。")
+    else:
+        L.append(f"- 已接入 OpenAlex `cited_by_count` 被引信号（聚合实体 `citation_sum` 字段），"
+                 f"但当前实体尚未关联到有引用的论文；待 OpenAlex 论文完成抽取并入聚合后，影响力榜将揭示高频但低影响力的「伪热点」。")
     L.append("")
     L.append("---")
     L.append("_本分析由 `src/analyze.py` 自动生成，消费既有聚合数据，零新增抓取成本。_")
@@ -311,6 +379,15 @@ def main() -> int:
         "software": heat_top(sw),
     }
 
+    print("[analyze] 影响力 Top（citation 加权）...")
+    doi_cit = build_doi_citation_map()
+    influence = {
+        "tools": influence_top(tools, doi_cit),
+        "tasks": influence_top(tasks, doi_cit),
+        "databases": influence_top(dbs, doi_cit),
+        "software": influence_top(sw, doi_cit),
+    }
+
     print("[analyze] 共现网络 + 社群发现 ...")
     cooccurrence = cooccurrence_clusters(tasks, tool_freq)
 
@@ -324,6 +401,7 @@ def main() -> int:
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "quality": quality,
         "heat": heat,
+        "influence": influence,
         "cooccurrence": cooccurrence,
         "cross": cross,
         "monthly": monthly,
