@@ -206,7 +206,7 @@ def build_canonical(entities: list[dict], alias_rev: dict[str, str], fuzzy: floa
         base["frequency"] = len(set(s for s in sources if s))
         base["mentions"] = len(members)
         base["source_papers"] = sorted(set(s for s in sources if s))
-        base["citation_sum"] = sum(int(m.get("_citation", 0) or 0) for m in members)
+        base["citation_sum"] = sum(int(entities[m].get("_citation", 0) or 0) for m in members)
         merged.append(base)
     return merged
 
