@@ -3,11 +3,14 @@
 """
 run_all.py — 五阶段流水线编排（Biomni-E1）
 
-默认离线跑 Phase 3→5（基于已有 data/extractions，无需联网/API key）。
+默认离线跑完整下游闭环（基于已有 data/extractions，无需联网/API key）：
+  deduplicate → validate → build_env → auto_review → analyze → metrics
+（auto_review / analyze / metrics 均为确定性、零 LLM 依赖的本地计算）
+
 加 --with-fetch / --with-extract 可串联 Phase 1/2（需联网；Phase 2 还需配置 OPENAI_API_KEY）。
 
 用法：
-  python src/run_all.py                  # Phase 3→5
+  python src/run_all.py                  # 完整下游闭环（Phase 3→5 + 指标层）
   python src/run_all.py --with-extract   # Phase 2→5（需 API key）
   python src/run_all.py --all            # Phase 1→5（需联网 + API key）
 """
@@ -47,6 +50,10 @@ def main() -> int:
     rc |= run("deduplicate.py")
     rc |= run("validate.py")
     rc |= run("build_env.py")
+    # —— 下游分析 + 指标闭环（确定性、零 LLM 依赖）——
+    rc |= run("auto_review.py")      # Phase 4b：复核队列自动收敛，产出 auto_review_metrics.json
+    rc |= run("analyze.py")          # Phase 5+：洞察层，产出 analysis.json / analysis_report.md
+    rc |= run("metrics.py")          # 指标层：精准度量化仪表盘 metrics.json（本任务目标）
     print("\n=== 完成 ===")
     return rc
 
