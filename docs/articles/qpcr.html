@@ -1,0 +1,42 @@
+<p>「生物学研究方法七件套」第 3 篇。<strong>qPCR（定量 PCR）被 99 篇论文使用</strong>，是验证环节的常青树。它和 RNA-seq 是"全局 vs 单点"的互补：RNA-seq 扫全库，qPCR 把关键结论钉死。</p>
+
+<h2>一、它解决什么问题</h2>
+<p>当你已经从 RNA-seq 或芯片里挑出几个"疑似差异基因"，需要<strong>精确、可重复地量化它们的表达倍数</strong>，用最少的样本、最低的成本确认结论——这就是 qPCR 的主场。它也能定量 DNA 拷贝数、病毒载量、甲基化水平。</p>
+
+<h2>二、基本原理（大白话）</h2>
+<p>PCR 是指数级扩增：每循环目标 DNA 翻倍。qPCR 的"q"在于<strong>实时监测</strong>——荧光信号随扩增增强，当信号跨过阈值时的循环数叫 Ct 值。<strong>Ct 越小，起始模板越多</strong>。用参考基因做归一化，再靠 ΔΔCt 法算相对倍数变化。</p>
+<p>两种主流荧光法：<strong>SYBR Green</strong>（嵌进双链 DNA，便宜但非特异）与 <strong>TaqMan 探针</strong>（特异结合，贵但干净）。</p>
+
+<h2>三、标准流程</h2>
+<ol>
+<li><strong>反转录</strong>（测 RNA 时）：total RNA → cDNA。</li>
+<li><strong>设计引物</strong>：跨内含子、Tm 匹配、验证扩增效率接近 100%。</li>
+<li><strong>加样与扩增</strong>：cDNA + 引物 + 荧光试剂上机，40 个循环实时读取。</li>
+<li><strong>数据分析</strong>：选稳定内参（如 GAPDH / ACTB，最好用 geNorm 验证），ΔΔCt 算倍数。</li>
+</ol>
+
+<h2>四、在"七件套"中如何协同</h2>
+<ul>
+<li>与 <strong>RNA-seq</strong>：RNA-seq 发现差异 → qPCR 验证 top 候选，这是 2539 篇论文里最固定的"上下游"组合。</li>
+<li>与 <strong>免疫荧光 / 质谱</strong>：在 mRNA 水平确认后，再用蛋白层面（IF 定位、质谱定量）闭环。</li>
+<li>与 <strong>CRISPR/Cas9</strong>：敲除后 qPCR 快速确认靶基因 mRNA 是否被有效下调。</li>
+<li>与 <strong>Southern blot</strong>：在基因整合/拷贝数研究中，qPCR 估拷贝数、Southern 给确证。</li>
+</ul>
+
+<h2>五、真实研究案例</h2>
+<p>语料中 <em>The histone chaperone CAF-1 prevents Rad52-mediated instability of the budding yeast ribosomal DNA during replication-coupled DNA double-strand break repair</em>（DOI: <a href="https://doi.org/10.1101/2024.03.12.584701">10.1101/2024.03.12.584701</a>）即通过 qPCR 定量 rDNA 区域的拷贝与稳定性变化。</p>
+
+<h2>六、优点、局限与常见坑</h2>
+<ul>
+<li><strong>优点</strong>：灵敏（可测单拷贝）、快、便宜、仪器普及。</li>
+<li><strong>局限</strong>：一次只看少数靶点；依赖引物质量；是相对定量而非绝对分子数。</li>
+<li><strong>常见坑</strong>：<strong>内参不稳</strong>——别盲目用 GAPDH，先验证其在处理下不变；<strong>扩增效率偏离 100%</strong>——ΔΔCt 假设效率一致，偏离大要用标准曲线法；<strong>引物二聚体</strong>——熔解曲线必看。</li>
+</ul>
+
+<h2>七、前沿进展</h2>
+<p><strong>dPCR（数字 PCR）</strong>把反应分割到上万个微滴，绝对定量且不怕抑制剂，正侵蚀传统 qPCR 在精准医疗（ctDNA、病毒载量）的份额；<strong>高通量 qPCR 芯片</strong>则把"单点验证"扩到"中通量面板"。但作为日常验证的"标尺"，qPCR 的地位短期难撼。</p>
+
+<h2>八、小结与学习建议</h2>
+<p>qPCR 是分子生物的"游标卡尺"——不华丽，但每个结论最终都要它盖戳。入门建议：把引物设计、熔解曲线、内参验证三件事练熟，再把它当作 RNA-seq / CRISPR 结果的"确认键"使用。</p>
+
+<p style="color:#718096;font-size:13px;">系列导航：RNA-seq · 免疫荧光 · 荧光显微镜 · Southern blot · CRISPR/Cas9 · 质谱。数据底座：2539 篇 bioRxiv/medRxiv 预印本自动化提取。</p>

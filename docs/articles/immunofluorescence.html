@@ -1,0 +1,43 @@
+<p>「生物学研究方法七件套」第 2 篇。在我们的 2539 篇预印本语料中，<strong>免疫荧光（Immunofluorescence, IF）被 107 篇论文使用</strong>，是湿实验技术里出现频率最高的。它回答一个 RNA-seq 永远答不了的问题：<strong>这个蛋白，到底在细胞的哪个位置、长什么样子？</strong></p>
+
+<h2>一、它解决什么问题</h2>
+<p>RNA-seq 告诉你"基因表达了多少"，但蛋白才是干活的角色，而且蛋白的<strong>空间定位</strong>往往决定功能——一个转录因子在细胞质还是细胞核，天差地别。免疫荧光用"抗体当探针、荧光当信号"，在细胞或组织切片上把目标蛋白<strong>可视化并定位</strong>。</p>
+
+<h2>二、基本原理（大白话）</h2>
+<p>核心是利用抗原-抗体的特异性结合。先用<strong>一抗</strong>识别目标蛋白，再用带荧光染料的<strong>二抗</strong>结合一抗；在荧光显微镜下，哪里发光，哪里就有目标蛋白。多重标记时可用不同颜色的荧光（如 FITC 绿、TRITC 红、DAPI 蓝染细胞核）同时看多个靶点。</p>
+
+<h2>三、标准流程</h2>
+<ol>
+<li><strong>固定</strong>：用多聚甲醛等固定样本，锁住蛋白位置（常用 4% PFA）。</li>
+<li><strong>透化</strong>：用 Triton X-100 打孔细胞膜，让抗体进入胞内。</li>
+<li><strong>封闭</strong>：用 BSA/血清封闭非特异性位点，降低背景。</li>
+<li><strong>一抗孵育</strong>：4℃ 过夜，让抗体结合目标表位。</li>
+<li><strong>二抗孵育</strong>：带荧光的二抗，避光室温孵育。</li>
+<li><strong>封片与成像</strong>：加抗淬灭封片剂，在荧光显微镜下采集图像。</li>
+</ol>
+
+<h2>四、在"七件套"中如何协同</h2>
+<ul>
+<li>与 <strong>荧光显微镜</strong>：IF 是"染色"，显微镜是"眼睛"——没有显微镜，荧光信号无处可看；共聚焦/超分辨显微镜让 IF 从"看到"升级到"看清"。</li>
+<li>与 <strong>RNA-seq / qPCR</strong>：组学发现某基因差异表达后，IF 在蛋白层面、空间层面验证"它真的在变，且在那儿变"。</li>
+<li>与 <strong>CRISPR/Cas9</strong>：用荧光报告基因（如 GFP 融合）标记编辑事件，IF 或荧光显微直接读出编辑效果与亚细胞定位。</li>
+<li>与 <strong>质谱</strong>：免疫沉淀（IP）下拉复合体后再做质谱，是"先靶向捕获、再无偏鉴定"的经典组合。</li>
+</ul>
+
+<h2>五、真实研究案例</h2>
+<p>语料中 <em>Pregranulosa cells engage a distinct transcriptional programme prior to cell-cycle dependent primordial follicle activation</em>（DOI: <a href="https://doi.org/10.1101/2022.10.24.513438">10.1101/2022.10.24.513438</a>）即借助免疫荧光定位卵巢中前颗粒细胞的标志蛋白，把单细胞转录组发现的亚群落到空间表型上。</p>
+
+<h2>六、优点、局限与常见坑</h2>
+<ul>
+<li><strong>优点</strong>：保留空间信息、可多重复用、直观。</li>
+<li><strong>局限</strong>：依赖高质量抗体（贵且可能交叉反应）；是相对定性/半定量，难给精确浓度；固定可能改变抗原性。</li>
+<li><strong>常见坑</strong>：<strong>背景太高</strong>——封闭不充分或二抗非特异性；<strong>荧光淬灭</strong>——未见光操作、用抗淬灭剂；<strong>抗体冲突</strong>——同物种一抗混用时二抗交叉结合，需用直接标记或不同宿主来源抗体。</li>
+</ul>
+
+<h2>七、前沿进展</h2>
+<p>从"看一个靶点"到"看一张图谱"：<strong>多重免疫荧光</strong>（multiplexed IF）可在同一张切片上轮转显色，一次标记数十个蛋白；<strong>超分辨显微镜</strong>（STED、SIM）突破衍射极限，看清单个蛋白复合体；<strong>空间蛋白质组</strong>把 IF 的思路扩展到无偏探测。成像正从"照片"变成"数据"。</p>
+
+<h2>八、小结与学习建议</h2>
+<p>免疫荧光是连接"分子发现"和"细胞现实"的桥。入门建议：先练好固定/透化/封闭的"手感"，再用商业化一抗做双标，最后才挑战多重与定量成像。记住——它和荧光显微镜是一对，和 RNA-seq / qPCR 是上下游验证关系。</p>
+
+<p style="color:#718096;font-size:13px;">系列导航：RNA-seq · qPCR · 荧光显微镜 · Southern blot · CRISPR/Cas9 · 质谱。数据底座：2539 篇 bioRxiv/medRxiv 预印本自动化提取。</p>

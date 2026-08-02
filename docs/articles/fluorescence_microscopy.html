@@ -1,0 +1,42 @@
+<p>「生物学研究方法七件套」第 4 篇。<strong>荧光显微镜（Fluorescence Microscopy）</strong>是免疫荧光、活细胞成像、CRISPR 报告基因等一众技术的"眼睛"。在我们的语料里，荧光相关方法高度密集——仅"免疫荧光"一项就被 107 篇论文使用，而共聚焦、超分辨、活细胞成像等变体也频繁出现。本文讲清这台"眼睛"本身。</p>
+
+<h2>一、它解决什么问题</h2>
+<p>普通明场显微镜只能看形态，看不到特定分子。<strong>荧光显微镜用"激发光→发射光"的原理，只让被荧光标记的结构发光</strong>，从而在复杂背景里把目标"点亮"。它是把分子事件落到空间坐标上的唯一日常手段。</p>
+
+<h2>二、基本原理（大白话）</h2>
+<p>荧光分子（染料或荧光蛋白）吸收短波长光（激发）、发射长波长光（发射）。显微镜用二向色镜把激发光和发射光分开，只让发射光进相机。<strong>共聚焦显微镜</strong>加一个针孔挡掉焦平面外的杂光，得到光学切片；<strong>超分辨</strong>则突破衍射极限（~200nm）看到更细结构。</p>
+
+<h2>三、标准流程</h2>
+<ol>
+<li><strong>样本制备</strong>：固定/切片或培养活细胞，加载荧光探针（染料、抗体、GFP 融合等）。</li>
+<li><strong>选择通道</strong>：按荧光基团选激发/发射滤光片（DAPI / FITC / TRITC / Cy5 等）。</li>
+<li><strong>对焦与采集</strong>：明场定位 → 切换荧光通道 → 调激光/曝光避免过曝与淬灭。</li>
+<li><strong>Z 栈与重构</strong>：共聚焦下采集多层 Z 切片，三维重构。</li>
+<li><strong>定量分析</strong>：用 ImageJ / Fiji 做强度、共定位、形态量化。</li>
+</ol>
+
+<h2>四、在"七件套"中如何协同</h2>
+<ul>
+<li>与 <strong>免疫荧光</strong>：显微镜是 IF 信号的采集端，二者一体两面。</li>
+<li>与 <strong>CRISPR/Cas9</strong>：荧光报告基因（如 CRISPR 敲入的 GFP）让编辑事件可被显微镜直接读出。</li>
+<li>与 <strong>RNA-seq / qPCR</strong>：成像给出"在哪儿、长啥样"，组学给出"变了多少"，空间与分子互证。</li>
+<li>与 <strong>质谱</strong>：成像看到的亚细胞结构，可进一步用质谱做空间/亚细胞蛋白质组。</li>
+</ul>
+
+<h2>五、真实研究案例</h2>
+<p>语料中 <em>Distinct Activation Mechanisms of CXCR4 and ACKR3 Revealed by Single-Molecule Analysis of their Conformational Landscapes</em>（DOI: <a href="https://doi.org/10.1101/2023.10.31.564925">10.1101/2023.10.31.564925</a>）即用单分子荧光成像解析受体的构象动态，是荧光显微镜推动机制发现的代表。</p>
+
+<h2>六、优点、局限与常见坑</h2>
+<ul>
+<li><strong>优点</strong>：保留空间与动态信息、可活细胞长时间观测、多重标记。</li>
+<li><strong>局限</strong>：受光毒性与光漂白限制（活细胞不能久照）；分辨率受衍射极限（除非超分辨）；定量需谨慎校准。</li>
+<li><strong>常见坑</strong>：<strong>通道串色</strong>——滤光片不够纯导致信号泄漏，需设单染对照；<strong>过曝</strong>——丢失线性动态范围；<strong>忽略共定位判据</strong>——用 Pearson / Manders 系数而非肉眼判断。</li>
+</ul>
+
+<h2>七、前沿进展</h2>
+<p><strong>超分辨</strong>（STED、SIM、PALM/STORM）把分辨率推到纳米级；<strong>光片荧光显微镜（Light-sheet）</strong>用薄片光照射，大幅降低光毒性，适合发育活体长时程；<strong>活细胞基因编码传感器</strong>让代谢物、离子、蛋白互作实时发光。显微镜正从"拍照"走向"电影+定量"。</p>
+
+<h2>八、小结与学习建议</h2>
+<p>荧光显微镜是七件套里"看世界"的窗口。入门建议：先吃透共聚焦的针孔与通道设置，练好 Fiji 定量，再碰超分辨与活细胞成像。记住它和免疫荧光是搭档，和 RNA-seq / qPCR 是验证闭环。</p>
+
+<p style="color:#718096;font-size:13px;">系列导航：RNA-seq · 免疫荧光 · qPCR · Southern blot · CRISPR/Cas9 · 质谱。数据底座：2539 篇 bioRxiv/medRxiv 预印本自动化提取。</p>

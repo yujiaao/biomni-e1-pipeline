@@ -1,0 +1,42 @@
+<p>「生物学研究方法七件套」第 5 篇。<strong>Southern blot（南印迹）被 85 篇论文使用</strong>。在 RNA-seq、qPCR 当道的今天，它显得"古典"，但在回答一个特定问题时依然无可替代：<strong>这段特定 DNA 序列，在基因组里到底有几份、长什么样？</strong></p>
+
+<h2>一、它解决什么问题</h2>
+<p>PCR 类方法擅长"有没有、有多少拷贝扩增产物"，但看不清<strong>基因组层面的整合事件</strong>：转基因插在哪条染色体、敲除是纯合还是杂合、病毒是否整合、重复序列怎么排布。Southern blot 通过把 DNA 按大小分离后再用探针杂交，直接看到基因组上目标序列的"带型"。</p>
+
+<h2>二、基本原理（大白话）</h2>
+<p>名字来自发明者 Edwin Southern。流程是：把基因组 DNA 用限制酶切开 → 电泳按大小分开 → 碱性变性后<strong>印迹（blot）到膜上</strong>固定 → 用带标记的 DNA 探针杂交 → 显影看"哪条带、多亮"。带的位置反映片段大小，亮度反映拷贝数，带的条数反映整合位点数量。</p>
+
+<h2>三、标准流程</h2>
+<ol>
+<li><strong>酶切</strong>：用合适限制酶切基因组 DNA（完全消化很关键）。</li>
+<li><strong>电泳</strong>：琼脂糖凝胶按大小分离。</li>
+<li><strong>转膜</strong>：毛细/正压把 DNA 转移到尼龙膜。</li>
+<li><strong>探针标记与杂交</strong>：放射性或地高辛标记探针，与膜上目标序列退火。</li>
+<li><strong>洗膜与显影</strong>：洗去非特异信号，成像读取带型。</li>
+</ol>
+
+<h2>四、在"七件套"中如何协同</h2>
+<ul>
+<li>与 <strong>CRISPR/Cas9</strong>：编辑后 qPCR 看 mRNA、Southern blot 确证基因组整合/敲除的纯合性——这是基因编辑论文的"黄金双证"。</li>
+<li>与 <strong>qPCR</strong>：qPCR 估拷贝数，Southern 给带型确证，互为补充。</li>
+<li>与 <strong>RNA-seq</strong>：RNA-seq 看表达变化，Southern 看上游基因型，解释"为什么表达变了"。</li>
+<li>与 <strong>质谱 / 免疫荧光</strong>：在蛋白/定位层面进一步确认编辑后果。</li>
+</ul>
+
+<h2>五、真实研究案例</h2>
+<p>语料中 <em>An ALS Assembly Modulator Signature in Peripheral Blood Mononuclear Cells</em>（DOI: <a href="https://doi.org/10.1101/2024.03.28.587289">10.1101/2024.03.28.587289</a>）涉及对基因重排/整合状态的基因组层面确认，体现了 Southern blot 在验证结构变异中的价值。</p>
+
+<h2>六、优点、局限与常见坑</h2>
+<ul>
+<li><strong>优点</strong>：直接看基因组整合与拷贝数，结果权威，是许多期刊要求的确证手段。</li>
+<li><strong>局限</strong>：耗时（数天）、需大量高质量基因组 DNA、依赖探针特异性；放射性标记有安全风险。</li>
+<li><strong>常见坑</strong>：<strong>酶切不完全</strong>——产生拖尾假带；<strong>转膜效率低</strong>——小片段易丢失；<strong>探针不纯</strong>——高背景掩盖真实带。</li>
+</ul>
+
+<h2>七、前沿进展</h2>
+<p>Southern blot 本身变化不大，但它的任务正被<strong>长读长测序（Nanopore / PacBio）</strong>和<strong>数字 PCR</strong>部分接管——前者能直接读出整合位点的完整序列，后者精确定量拷贝数。不过在需要"一眼看到带型"的确证场景里，它仍有一席之地。</p>
+
+<h2>八、小结与学习建议</h2>
+<p>Southern blot 是七件套里的"法医"——慢，但结论硬。入门建议：把它当作 CRISPR / 转基因项目的终检手段，重点练好酶切完全性与探针设计。它和 qPCR、CRISPR 是基因编辑验证的铁三角。</p>
+
+<p style="color:#718096;font-size:13px;">系列导航：RNA-seq · 免疫荧光 · qPCR · 荧光显微镜 · CRISPR/Cas9 · 质谱。数据底座：2539 篇 bioRxiv/medRxiv 预印本自动化提取。</p>

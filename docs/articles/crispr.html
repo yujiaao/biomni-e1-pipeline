@@ -1,0 +1,44 @@
+<p>「生物学研究方法七件套」第 6 篇。<strong>CRISPR/Cas9 被 61 篇论文使用</strong>，是七件套里唯一一个"能改写基因组"的技术——其它六种都是"观测"，它是"干预"。正因如此，它常作为上游扰动，再配合下游五种观测手段读出结果。</p>
+
+<h2>一、它解决什么问题</h2>
+<p>想研究一个基因的功能，最干净的办法是<strong>把它关掉或改掉，再看表型变化</strong>。CRISPR/Cas9 用一段引导 RNA（sgRNA）把 Cas9 蛋白带到目标 DNA 序列上，像剪刀一样切开，细胞修复时引入突变（敲除）或借供体模板精确改写（敲入）。它把"基因编辑"从难如登天变成常规操作。</p>
+
+<h2>二、基本原理（大白话）</h2>
+<p>sgRNA 负责"导航"——它的序列与目标基因互补；Cas9 负责"剪切"——在 PAM 序列附近切开双链。细胞用非同源末端连接（NHEJ）修复时容易出错，造成敲除；若提供同源模板，则能精准敲入。<strong>碱基编辑器（ABE/CBE）</strong>和<strong>先导编辑（prime editing）</strong>则无需双链断裂即可改单个碱基。</p>
+
+<h2>三、标准流程</h2>
+<ol>
+<li><strong>设计 sgRNA</strong>：选高特异、低脱靶靶点，避开同源序列。</li>
+<li><strong>递送</strong>：质粒、病毒（慢病毒/AAV）或 RNP 复合物导入细胞。</li>
+<li><strong>筛选与克隆</strong>：抗生素/荧光筛选，单克隆扩增。</li>
+<li><strong>确认编辑</strong>：测序验证；用 <strong>qPCR</strong> 看 mRNA、<strong>Southern blot</strong> 看基因组整合。</li>
+<li><strong>表型读出</strong>：敲除后做 <strong>RNA-seq</strong> 看下游网络、<strong>免疫荧光/显微镜</strong> 看定位与形态。</li>
+</ol>
+
+<h2>四、在"七件套"中如何协同</h2>
+<p>CRISPR 是"因"，其它五种是"果"的读数：</p>
+<ul>
+<li>与 <strong>RNA-seq</strong>：敲除某基因 → RNA-seq 读出整个下游调控网络（扰动-组学闭环）。</li>
+<li>与 <strong>qPCR</strong>：快速确认靶基因是否被有效下调。</li>
+<li>与 <strong>Southern blot</strong>：确认基因组层面的敲除/敲入纯合性。</li>
+<li>与 <strong>免疫荧光 / 荧光显微镜</strong>：GFP 报告基因或荧光成像直接读出编辑效果与亚细胞定位。</li>
+<li>与 <strong>质谱</strong>：编辑后做蛋白质组，看全局蛋白变化。</li>
+</ul>
+
+<h2>五、真实研究案例</h2>
+<p>语料中 <em>KSR1 mediates small-cell lung carcinoma tumor initiation and cisplatin resistance</em>（DOI: <a href="https://doi.org/10.1101/2024.02.23.581815">10.1101/2024.02.23.581815</a>）即用 CRISPR 敲除/编辑手段锁定 KSR1 在小细胞肺癌中的功能，是"干预+表型"研究的典型。</p>
+
+<h2>六、优点、局限与常见坑</h2>
+<ul>
+<li><strong>优点</strong>：易用、便宜、可高通量筛选（CRISPR 文库）。</li>
+<li><strong>局限</strong>：脱靶效应；敲除可能激活代偿；大片段敲入效率低。</li>
+<li><strong>常见坑</strong>：<strong>脱靶</strong>——用在线工具评分 + 实验验证；<strong>只测混合池</strong>——不克隆验证会有嵌合误导；<strong>假阴性</strong>——NHEJ 修复恰好未破坏 reading frame，需测序确证。</li>
+</ul>
+
+<h2>七、前沿进展</h2>
+<p>从"剪刀"到"铅笔"：<strong>碱基编辑</strong>精准改单碱基不切双链；<strong>先导编辑</strong>可写入任意小序列；<strong>CRISPR 筛选+单细胞测序</strong>把"敲除谁、表型如何"一次性大规模读出；<strong>表观编辑</strong>则不改序列只改开关。CRISPR 正从基因功能工具变成治疗平台（如获批的镰刀型贫血疗法）。</p>
+
+<h2>八、小结与学习建议</h2>
+<p>CRISPR 是七件套里唯一的"扳机"。入门建议：先学会 sgRNA 设计与脱靶评估，再用公共 CRISPR 筛选数据练手，最后做体内外验证——务必用 qPCR / Southern / RNA-seq 把"编辑成功"和"表型因果"都钉死。</p>
+
+<p style="color:#718096;font-size:13px;">系列导航：RNA-seq · 免疫荧光 · qPCR · 荧光显微镜 · Southern blot · 质谱。数据底座：2539 篇 bioRxiv/medRxiv 预印本自动化提取。</p>
